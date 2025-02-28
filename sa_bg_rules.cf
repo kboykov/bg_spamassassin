@@ -320,12 +320,12 @@ describe BG_PHISH_PHRASE3 Bulgarian phrase about following a link
 
 # Base64 in URLs
 uri BG_BASE64_URL /[a-zA-Z0-9+\/]{20,}={0,2}/
-score BG_BASE64_URL 3.0
+score BG_BASE64_URL 0.1
 describe BG_BASE64_URL URL contains likely base64 encoded data
 
 # PHP URLs
 uri BG_PHP_URL /\.php(\?|$)/i
-score BG_PHP_URL 1.5
+score BG_PHP_URL 0.5
 describe BG_PHP_URL URL contains PHP script
 
 # Suspicious URL patterns
