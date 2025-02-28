@@ -1,4 +1,6 @@
-body BG_PHISHING_URGENCY /\b(?:важно|спешно|изтича|изтекъл|актуализирай(?:те)?|подновете|потвърдете|действайте|предупреждение|забелязахме|блокирани|валидност|краен\s+срок|необходими|спрян|авторизация|сметката?\s?ви|изисквания|безпроблемн(?:и|и)?|непрекъснат|номер\s+\w+|добавете|активирайте)\b/i describe BG_PHISHING_URGENCY Bulgarian words/phrases often used in phishing or urgency/spam emails score BG_PHISHING_URGENCY 0.1
+body BG_PHISHING_URGENCY /\b(?:важно|спешно|изтича|изтекъл|актуализирай(?:те)?|подновете|потвърдете|действайте|предупреждение|забелязахме|блокирани|валидност|краен\s+срок|необходими|спрян|авторизация|сметката?\s?ви|изисквания|безпроблемн(?:и|и)?|непрекъснат|номер\s+\w+|добавете|активирайте)\b/i 
+describe BG_PHISHING_URGENCY Bulgarian words/phrases often used in phishing or urgency/spam emails 
+score BG_PHISHING_URGENCY 0.1
 
 body PHISH_BG_CLICK_ACTION /(?:натиснете тук|кликнете върху|отворете|отворете писмото|потвърдите|потвърдете|актуализирайте данните|актуализиране|актуализиране)/i
 score PHISH_BG_CLICK_ACTION 0.2
@@ -16,9 +18,9 @@ score CONTAINS_BG_BANK_NAMES 0.2
 describe CONTAINS_BG_BANK_NAMES Email body contains names of Bulgarian banks
 
 # Second part: Check that sender domains don't match official bank domains
-header MISMATCHED_BG_BANK_SENDER From:/.+@(?!dskbank\.bg|unicreditgroup\.bg|postbank\.bg|ubb\.bg|ibank\.bg|fibank\.bg|teximbank\.bg|ccbank\.bg|bank\.allianz\.bg|bacb\.bg|tbibank\.bg|procreditbank\.bg|iabank\.bg|dbank\.bg|bdbank\.bg|tcebank\.com|municipalbank\.bg)(.+\..+)$/i
-score MISMATCHED_BG_BANK_SENDER 0.0
-describe MISMATCHED_BG_BANK_SENDER Sender domain doesn't match any official Bulgarian bank domains
+header   MISMATCHED_BG_BANK_SENDER  From =~ /@(?!dskbank\.bg|unicreditgroup\.bg|postbank\.bg|ubb\.bg|ibank\.bg|fibank\.bg|teximbank\.bg|ccbank\.bg|bank\.allianz\.bg|bacb\.bg|tbibank\.bg|procreditbank\.bg|iabank\.bg|dbank\.bg|bdbank\.bg|tcebank\.com|municipalbank\.bg).+/i
+describe MISMATCHED_BG_BANK_SENDER  From address claims to be Bulgarian bank but domain doesn't match known banks
+score    MISMATCHED_BG_BANK_SENDER  0.0
 
 # Combined rule for higher confidence
 meta BG_BANK_PHISHING (CONTAINS_BG_BANK_NAMES && MISMATCHED_BG_BANK_SENDER)
@@ -387,14 +389,14 @@ describe BG_FINANCIAL_PHISHING Urgent requests related to financial information 
 ##############################################
 
 # Suspicious Bulgarian subject lines
-header BG_SUBJ_PWD /Subject: .*парол[а|и].*изтек/i
-score BG_SUBJ_PWD 2.0
-describe BG_SUBJ_PWD Subject contains Bulgarian password expiration terms
+header   BG_SUBJ_PWD  Subject =~ /парол(?:а|и).*изтек/i
+describe BG_SUBJ_PWD  Subject mentions expiring password in Bulgarian
+score    BG_SUBJ_PWD  2.0
 
-header BG_SUBJ_ACCOUNT /Subject: .*акаунт.*активир|потвърд|верифиц/i
-score BG_SUBJ_ACCOUNT 2.0
-describe BG_SUBJ_ACCOUNT Subject contains Bulgarian account verification terms
+header   BG_SUBJ_ACCOUNT Subject =~ /акаунт.*(?:активир|потвърд|верифиц)/i
+describe BG_SUBJ_ACCOUNT Subject references activating/verifying an account in Bulgarian
+score    BG_SUBJ_ACCOUNT 2.0
 
-header BG_SUBJ_URGENT /Subject: .*\[спешно|важно|критично\]/i
-score BG_SUBJ_URGENT 1.5
-describe BG_SUBJ_URGENT Subject contains Bulgarian urgency indicators
+header   BG_SUBJ_URGENT Subject =~ /\[?(?:спешно|важно|критично)\]?/i
+describe BG_SUBJ_URGENT Subject indicates urgent/important/critical in Bulgarian
+score    BG_SUBJ_URGENT 1.5
