@@ -1,2 +1,2 @@
 # bg_spamassassin
-Some custom spamasassin rules for content flagging
+Some custom spamasassin rules for content flagging of phishy keywords.
