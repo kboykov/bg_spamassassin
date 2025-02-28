@@ -1,0 +1,209 @@
+body BG_PHISHING_URGENCY /\b(?:важно|спешно|изтича|изтекъл|актуализирай(?:те)?|подновете|потвърдете|действайте|предупреждение|забелязахме|блокирани|валидност|краен\s+срок|необходими|спрян|авторизация|сметката?\s?ви|изисквания|безпроблемн(?:и|и)?|непрекъснат|номер\s+\w+|добавете|активирайте)\b/i describe BG_PHISHING_URGENCY Bulgarian words/phrases often used in phishing or urgency/spam emails score BG_PHISHING_URGENCY 0.1
+
+body PHISH_BG_CLICK_ACTION /(?:натиснете тук|кликнете върху|отворете|отворете писмото|потвърдите|потвърдете|актуализирайте данните|актуализиране|актуализиране)/i
+score PHISH_BG_CLICK_ACTION 0.2
+describe PHISH_BG_CLICK_ACTION Contains suspicious call-to-action phrases
+
+meta BG_PHISHING_META (BG_PHISHING_URGENCY && PHISH_BG_CLICK_ACTION)
+score BG_PHISHING_META 4.0
+describe BG_PHISHING_META High confidence Bulgarian bank phishing attempt - contains urgency words and phishing call-to-action
+
+# Bulgarian Bank Phishing Detection Rule
+
+# First part: Check for Bulgarian bank names in the body (both Bulgarian and English versions)
+body CONTAINS_BG_BANK_NAMES /(?:Банка\s+ДСК|DSK\s+Bank|УниКредит\s+Булбанк|Уникредит|Unicredit|UniCredit\s+Bulbank|ЮРОБАНК\s+БЪЛГАРИЯ|Eurobank\s+Bulgaria|Postbank|ОБЕДИНЕНА\s+БЪЛГАРСКА\s+БАНКА|United\s+Bulgarian\s+Bank|ОББ|UBB|ИНВЕСТБАНК|Investbank|ПЪРВА\s+ИНВЕСТИЦИОННА\s+БАНКА|First\s+Investment\s+Bank|Fibank|ТЕКСИМ\s+БАНК|Texim\s+Bank|ЦЕНТРАЛНА\s+КООПЕРАТИВНА\s+БАНКА|Central\s+Cooperative\s+Bank|ЦКБ|CCB|АЛИАНЦ\s+БАНК\s+БЪЛГАРИЯ|Allianz\s+Bank\s+Bulgaria|БЪЛГАРО-АМЕРИКАНСКА\s+КРЕДИТНА\s+БАНКА|Bulgarian-American\s+Credit\s+Bank|БАКБ|BACB|ТИ\s+БИ\s+АЙ\s+Банк|TBI\s+Bank|ПроКредит\s+Банк|ProCredit\s+Bank|ИНТЕРНЕШЪНЪЛ\s+АСЕТ\s+БАНК|International\s+Asset\s+Bank|ТЪРГОВСКА\s+БАНКА\s+Д|Commercial\s+Bank\s+D|БЪЛГАРСКА\s+БАНКА\s+ЗА\s+РАЗВИТИЕ|Bulgarian\s+Development\s+Bank|ББР|BBR|ТОКУДА\s+БАНК|Tokuda\s+Bank|ОБЩИНСКА\s+БАНКА|Municipal\s+Bank)/i
+score CONTAINS_BG_BANK_NAMES 0.2
+describe CONTAINS_BG_BANK_NAMES Email body contains names of Bulgarian banks
+
+# Second part: Check that sender domains don't match official bank domains
+header MISMATCHED_BG_BANK_SENDER From:/.+@(?!dskbank\.bg|unicreditgroup\.bg|postbank\.bg|ubb\.bg|ibank\.bg|fibank\.bg|teximbank\.bg|ccbank\.bg|bank\.allianz\.bg|bacb\.bg|tbibank\.bg|procreditbank\.bg|iabank\.bg|dbank\.bg|bdbank\.bg|tcebank\.com|municipalbank\.bg)(.+\..+)$/i
+score MISMATCHED_BG_BANK_SENDER 0.0
+describe MISMATCHED_BG_BANK_SENDER Sender domain doesn't match any official Bulgarian bank domains
+
+# Combined rule for higher confidence
+meta BG_BANK_PHISHING (CONTAINS_BG_BANK_NAMES && MISMATCHED_BG_BANK_SENDER)
+score BG_BANK_PHISHING 7.0
+describe BG_BANK_PHISHING High confidence Bulgarian bank phishing attempt - mentions bank names but sent from non-bank domain
+
+# ============================================================================
+# BULGARIAN COURIER PHISHING DETECTION RULESET
+# ============================================================================
+
+# ============================================================================
+# BASE RULES - COURIER NAMES AND DOMAINS
+# ============================================================================
+
+# Courier company names in Bulgarian
+header __CONTAINS_BG_COURIER_NAMES Subject =~ /\b(?:Спиди|Еконт|Български пощи|БГ Пощи|DHL)\b/i
+body __BODY_CONTAINS_BG_COURIER_NAMES /\b(?:Спиди|Еконт|Български пощи|БГ Пощи|DHL)\b/i
+meta CONTAINS_BG_COURIER_NAMES (__CONTAINS_BG_COURIER_NAMES || __BODY_CONTAINS_BG_COURIER_NAMES)
+describe CONTAINS_BG_COURIER_NAMES Message contains Bulgarian courier company names
+
+# Legitimate courier domains
+header __FROM_LEGITIMATE_BG_COURIER From =~ /[@.](?:speedy\.bg|econt\.com|bgpost\.bg|dhlexpress\.bg|dhl\.com|dhl\.bg)$/i
+uri __URI_LEGITIMATE_BG_COURIER /^https?:\/\/(?:[a-z0-9-]+\.)*(?:speedy\.bg|econt\.com|bgpost\.bg|dhlexpress\.bg|dhl\.com|dhl\.bg)(?:\/|$)/i
+
+# Mismatched sender (claims to be from courier but isn't)
+header __COURIER_IN_FROM_NOT_DOMAIN From =~ /(?:Спиди|Speedy|Еконт|Econt|Български пощи|БГ Пощи|BG Post|BGPost|DHL)/i
+meta MISMATCHED_BG_COURIER_SENDER (__COURIER_IN_FROM_NOT_DOMAIN && !__FROM_LEGITIMATE_BG_COURIER)
+describe MISMATCHED_BG_COURIER_SENDER From header contains courier name but not from legitimate domain
+score MISMATCHED_BG_COURIER_SENDER 3.0
+
+# ============================================================================
+# PHISHING CONTENT INDICATORS
+# ============================================================================
+
+# Urgency language in Bulgarian (specific to courier phishing)
+body __BG_COURIER_URGENCY_1 /\b(?:спешн|неотложн|незабавн|веднага|бърз|последн|краен срок|изтича|наложителн)\w*\b/i
+body __BG_COURIER_URGENCY_2 /\b(?:час|дни|ден|време|минути|скоро|закъснение|отлаган)\w*\b/i
+body __BG_COURIER_URGENCY_3 /\b(?:не успе|не получите|изпусне|пропусне)\w*\b/i
+body __BG_COURIER_URGENCY_4 /\b(?:ще бъде върнат|ще върнем|ще бъде отказан|ще отменим|ще анулираме)\w*\b/i
+meta BG_COURIER_URGENCY (__BG_COURIER_URGENCY_1 && (__BG_COURIER_URGENCY_2 || __BG_COURIER_URGENCY_3 || __BG_COURIER_URGENCY_4))
+describe BG_COURIER_URGENCY Bulgarian urgency language related to package delivery
+score BG_COURIER_URGENCY 1.5
+
+# Click action phrases in Bulgarian (specific to courier phishing)
+body __PHISH_BG_COURIER_CLICK_1 /\b(?:кликне|натисне|отиде|посети|проследи|въведи|въведете|потвърди|потвърдете)\w*\b/i
+body __PHISH_BG_COURIER_CLICK_2 /\b(?:линк|връзка|бутон|тук|сайт|страница|портал|платформа)\w*\b/i
+body __PHISH_BG_COURIER_CLICK_3 /\b(?:доставка|пратка|колет|пакет|пощенска пратка|куриерска пратка|проследяване)\w*\b/i
+meta PHISH_BG_COURIER_CLICK_ACTION (__PHISH_BG_COURIER_CLICK_1 && __PHISH_BG_COURIER_CLICK_2 && __PHISH_BG_COURIER_CLICK_3)
+describe PHISH_BG_COURIER_CLICK_ACTION Bulgarian click action phrases related to package tracking
+score PHISH_BG_COURIER_CLICK_ACTION 1.5
+
+# Package/delivery status language in Bulgarian
+body __BG_PACKAGE_STATUS_1 /\b(?:пратка|доставка|колет|пакет|поръчка)\w*\b/i
+body __BG_PACKAGE_STATUS_2 /\b(?:чака|изчакващ|непотърсен|непотвърден|непотребен|необработен)\w*\b/i
+body __BG_PACKAGE_STATUS_3 /\b(?:офис|склад|хранилище|на адрес|куриер|доставчик)\w*\b/i
+meta BG_COURIER_PACKAGE_WAITING (__BG_PACKAGE_STATUS_1 && __BG_PACKAGE_STATUS_2 && __BG_PACKAGE_STATUS_3)
+describe BG_COURIER_PACKAGE_WAITING Bulgarian language about waiting package
+score BG_COURIER_PACKAGE_WAITING 1.0
+
+# Payment required language in Bulgarian
+body __BG_PAYMENT_REQUIRED_1 /\b(?:заплати|плати|платете|доплати|доплащане|такса|сума|лева|евро)\w*\b/i
+body __BG_PAYMENT_REQUIRED_2 /\b(?:наложен платеж|митническа такса|куриерска такса|такса обработка|такса доставка)\w*\b/i
+meta BG_COURIER_PAYMENT_REQUIRED (__BG_PAYMENT_REQUIRED_1 && __BG_PAYMENT_REQUIRED_2)
+describe BG_COURIER_PAYMENT_REQUIRED Bulgarian language about payment required for package
+score BG_COURIER_PAYMENT_REQUIRED 1.0
+
+# Personal data request in Bulgarian
+body __BG_PERSONAL_DATA_1 /\b(?:лични данни|информация|потвърждение|потвърдете|въведете|попълнете)\w*\b/i
+body __BG_PERSONAL_DATA_2 /\b(?:адрес|ЕГН|телефон|номер|карта|банкова сметка|кредитна карта|експресна карта)\w*\b/i
+meta BG_COURIER_DATA_REQUEST (__BG_PERSONAL_DATA_1 && __BG_PERSONAL_DATA_2)
+describe BG_COURIER_DATA_REQUEST Bulgarian language requesting personal/payment data
+score BG_COURIER_DATA_REQUEST 0.5
+
+# Combining base phishing indicators
+meta BG_COURIER_PHISHING_META (BG_COURIER_URGENCY && PHISH_BG_COURIER_CLICK_ACTION)
+describe BG_COURIER_PHISHING_META Multiple phishing indicators in Bulgarian courier message
+score BG_COURIER_PHISHING_META 4.0
+
+# Basic courier phishing pattern
+meta BG_COURIER_PHISHING (CONTAINS_BG_COURIER_NAMES && MISMATCHED_BG_COURIER_SENDER)
+describe BG_COURIER_PHISHING Message mentions courier but comes from suspicious sender
+score BG_COURIER_PHISHING 3.5
+
+# ============================================================================
+# META RULE COMBINATIONS
+# ============================================================================
+
+# Urgency + Courier Names
+meta BG_COURIER_URGENCY_COMBO (BG_COURIER_URGENCY && CONTAINS_BG_COURIER_NAMES)
+describe BG_COURIER_URGENCY_COMBO Bulgarian courier mentioned with urgency language
+score BG_COURIER_URGENCY_COMBO 4.5
+
+# Click Action + Courier Names
+meta BG_COURIER_CLICK_ACTION (PHISH_BG_COURIER_CLICK_ACTION && CONTAINS_BG_COURIER_NAMES)
+describe BG_COURIER_CLICK_ACTION Bulgarian courier mentioned with click action phrases
+score BG_COURIER_CLICK_ACTION 4.5
+
+# Urgency + Mismatched Sender
+meta BG_URGENCY_BAD_COURIER_SENDER (BG_COURIER_URGENCY && MISMATCHED_BG_COURIER_SENDER)
+describe BG_URGENCY_BAD_COURIER_SENDER Urgency language from non-courier sender
+score BG_URGENCY_BAD_COURIER_SENDER 5.0
+
+# Click Action + Mismatched Sender
+meta BG_CLICK_BAD_COURIER_SENDER (PHISH_BG_COURIER_CLICK_ACTION && MISMATCHED_BG_COURIER_SENDER)
+describe BG_CLICK_BAD_COURIER_SENDER Click action phrases from non-courier sender
+score BG_CLICK_BAD_COURIER_SENDER 5.0
+
+# Package waiting + Courier Names
+meta BG_PACKAGE_WAITING_COURIER (BG_COURIER_PACKAGE_WAITING && CONTAINS_BG_COURIER_NAMES)
+describe BG_PACKAGE_WAITING_COURIER Package waiting language with courier name
+score BG_PACKAGE_WAITING_COURIER 4.0
+
+# Payment required + Courier Names
+meta BG_PAYMENT_COURIER (BG_COURIER_PAYMENT_REQUIRED && CONTAINS_BG_COURIER_NAMES)
+describe BG_PAYMENT_COURIER Payment required language with courier name
+score BG_PAYMENT_COURIER 5.0
+
+# Data request + Courier Names
+meta BG_DATA_REQUEST_COURIER (BG_COURIER_DATA_REQUEST && CONTAINS_BG_COURIER_NAMES)
+describe BG_DATA_REQUEST_COURIER Personal data request with courier name
+score BG_DATA_REQUEST_COURIER 5.5
+
+# Triple combinations (even higher confidence)
+# Urgency + Click + Courier Name
+meta BG_URGENCY_CLICK_COURIER (BG_COURIER_URGENCY && PHISH_BG_COURIER_CLICK_ACTION && CONTAINS_BG_COURIER_NAMES)
+describe BG_URGENCY_CLICK_COURIER Urgency, click action and courier name all present
+score BG_URGENCY_CLICK_COURIER 7.0
+
+# Urgency + Click + Bad Sender
+meta BG_URGENCY_CLICK_BAD_SENDER (BG_COURIER_URGENCY && PHISH_BG_COURIER_CLICK_ACTION && MISMATCHED_BG_COURIER_SENDER)
+describe BG_URGENCY_CLICK_BAD_SENDER Urgency and click action from non-courier sender
+score BG_URGENCY_CLICK_BAD_SENDER 8.0
+
+# Courier Name + Click + Bad Sender
+meta BG_COURIER_CLICK_BAD_SENDER (CONTAINS_BG_COURIER_NAMES && PHISH_BG_COURIER_CLICK_ACTION && MISMATCHED_BG_COURIER_SENDER)
+describe BG_COURIER_CLICK_BAD_SENDER Courier name and click action from non-courier sender
+score BG_COURIER_CLICK_BAD_SENDER 8.5
+
+# Courier Name + Urgency + Bad Sender
+meta BG_COURIER_URGENCY_BAD_SENDER (CONTAINS_BG_COURIER_NAMES && BG_COURIER_URGENCY && MISMATCHED_BG_COURIER_SENDER)
+describe BG_COURIER_URGENCY_BAD_SENDER Courier name and urgency language from non-courier sender
+score BG_COURIER_URGENCY_BAD_SENDER 8.5
+
+# Payment + Urgency + Courier name
+meta BG_PAYMENT_URGENCY_COURIER (BG_COURIER_PAYMENT_REQUIRED && BG_COURIER_URGENCY && CONTAINS_BG_COURIER_NAMES)
+describe BG_PAYMENT_URGENCY_COURIER Payment required with urgency and courier name
+score BG_PAYMENT_URGENCY_COURIER 7.5
+
+# Payment + Bad sender + Courier name
+meta BG_PAYMENT_BAD_SENDER_COURIER (BG_COURIER_PAYMENT_REQUIRED && MISMATCHED_BG_COURIER_SENDER && CONTAINS_BG_COURIER_NAMES)
+describe BG_PAYMENT_BAD_SENDER_COURIER Payment required from non-courier sender with courier name
+score BG_PAYMENT_BAD_SENDER_COURIER 9.0
+
+# Meta rules with existing combinations
+# BG_COURIER_PHISHING_META (Urgency + Click Action) with Courier Name
+meta BG_PHISHING_META_COURIER (BG_COURIER_PHISHING_META && CONTAINS_BG_COURIER_NAMES)
+describe BG_PHISHING_META_COURIER Phishing urgency and actions with courier name
+score BG_PHISHING_META_COURIER 7.5
+
+# BG_COURIER_PHISHING_META (Urgency + Click Action) with Mismatched Sender
+meta BG_PHISHING_META_BAD_SENDER (BG_COURIER_PHISHING_META && MISMATCHED_BG_COURIER_SENDER)
+describe BG_PHISHING_META_BAD_SENDER Phishing urgency and actions from non-courier sender
+score BG_PHISHING_META_BAD_SENDER 7.0
+
+# BG_COURIER_PHISHING (Courier Name + Mismatched Sender) with Urgency
+meta BG_COURIER_PHISHING_URGENCY (BG_COURIER_PHISHING && BG_COURIER_URGENCY)
+describe BG_COURIER_PHISHING_URGENCY Courier phishing with urgency language
+score BG_COURIER_PHISHING_URGENCY 8.0
+
+# BG_COURIER_PHISHING (Courier Name + Mismatched Sender) with Click Action
+meta BG_COURIER_PHISHING_CLICK (BG_COURIER_PHISHING && PHISH_BG_COURIER_CLICK_ACTION)
+describe BG_COURIER_PHISHING_CLICK Courier phishing with click action phrases
+score BG_COURIER_PHISHING_CLICK 8.0
+
+# High confidence quadruple combinations
+meta BG_COURIER_PHISHING_COMPLETE (CONTAINS_BG_COURIER_NAMES && MISMATCHED_BG_COURIER_SENDER && BG_COURIER_URGENCY && PHISH_BG_COURIER_CLICK_ACTION)
+describe BG_COURIER_PHISHING_COMPLETE Complete courier phishing pattern detected
+score BG_COURIER_PHISHING_COMPLETE 10.0
+
+# Payment and data request combined (highly suspicious)
+meta BG_COURIER_PAYMENT_DATA (BG_COURIER_PAYMENT_REQUIRED && BG_COURIER_DATA_REQUEST)
+describe BG_COURIER_PAYMENT_DATA Suspicious payment and data request patterns
+score BG_COURIER_PAYMENT_DATA 7.0
+
+# Complete payment phishing
+meta BG_COURIER_PAYMENT_PHISHING (BG_COURIER_PAYMENT_REQUIRED && CONTAINS_BG_COURIER_NAMES && MISMATCHED_BG_COURIER_SENDER)
+describe BG_COURIER_PAYMENT_PHISHING Payment required message from fake courier sender
+score BG_COURIER_PAYMENT_PHISHING 9.5
