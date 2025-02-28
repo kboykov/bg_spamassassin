@@ -207,3 +207,194 @@ score BG_COURIER_PAYMENT_DATA 7.0
 meta BG_COURIER_PAYMENT_PHISHING (BG_COURIER_PAYMENT_REQUIRED && CONTAINS_BG_COURIER_NAMES && MISMATCHED_BG_COURIER_SENDER)
 describe BG_COURIER_PAYMENT_PHISHING Payment required message from fake courier sender
 score BG_COURIER_PAYMENT_PHISHING 9.5
+
+
+##############################################
+# Bulgarian Phishing Keywords and Phrases
+##############################################
+
+# Password Reset Related
+body BG_PWD_RESET1 /парола.*изтекла|изтича/i
+score BG_PWD_RESET1 2.0
+describe BG_PWD_RESET1 Bulgarian phrase about password expiration
+
+body BG_PWD_RESET2 /смяна на парола|сменете парола/i
+score BG_PWD_RESET2 1.5
+describe BG_PWD_RESET2 Bulgarian phrase about password change
+
+body BG_PWD_RESET3 /забравена парола|забравихте паролата/i
+score BG_PWD_RESET3 1.5
+describe BG_PWD_RESET3 Bulgarian phrase about forgotten password
+
+body BG_PWD_RESET4 /нулиране на парола|нулирайте парола/i
+score BG_PWD_RESET4 1.5
+describe BG_PWD_RESET4 Bulgarian phrase about password reset
+
+# Account Related
+body BG_ACCOUNT_EXPIRE1 /акаунт.*изтича|акаунт.*изтекъл/i
+score BG_ACCOUNT_EXPIRE1 2.0
+describe BG_ACCOUNT_EXPIRE1 Bulgarian phrase about account expiration
+
+body BG_ACCOUNT_EXPIRE2 /профил.*деактивиран|профил.*блокиран/i
+score BG_ACCOUNT_EXPIRE2 2.0
+describe BG_ACCOUNT_EXPIRE2 Bulgarian phrase about account deactivation
+
+body BG_ACCOUNT_SUSPEND /временно спиране|временно прекратен|суспендиран/i
+score BG_ACCOUNT_SUSPEND 2.0
+describe BG_ACCOUNT_SUSPEND Bulgarian phrase about account suspension
+
+body BG_ACCOUNT_VERIFY /потвърдете акаунт|верификация на акаунт/i
+score BG_ACCOUNT_VERIFY 1.5
+describe BG_ACCOUNT_VERIFY Bulgarian phrase about account verification
+
+# Urgent Action Required
+body BG_URGENT1 /спешно действие|незабавни действия|спешна актуализация/i
+score BG_URGENT1 2.0
+describe BG_URGENT1 Bulgarian phrase about urgent action required
+
+body BG_URGENT2 /важно съобщение|критично предупреждение/i
+score BG_URGENT2 1.5
+describe BG_URGENT2 Bulgarian phrase about important/critical message
+
+body BG_URGENT3 /последно предупреждение|финално известие/i
+score BG_URGENT3 2.0
+describe BG_URGENT3 Bulgarian phrase about final warning
+
+# Additional Information Required
+body BG_INFO_REQUIRED1 /допълнителна информация|актуализирайте данните/i
+score BG_INFO_REQUIRED1 1.5
+describe BG_INFO_REQUIRED1 Bulgarian phrase about additional info needed
+
+body BG_INFO_REQUIRED2 /актуализиране.*лични данни|обновете.*информация/i
+score BG_INFO_REQUIRED2 2.0
+describe BG_INFO_REQUIRED2 Bulgarian phrase about updating personal info
+
+body BG_VERIFY_IDENTITY /потвърдете самоличност|удостоверете идентичност/i
+score BG_VERIFY_IDENTITY 2.0
+describe BG_VERIFY_IDENTITY Bulgarian phrase about identity verification
+
+# Security Related
+body BG_SECURITY1 /подозрителна активност|необичайна дейност/i
+score BG_SECURITY1 2.0
+describe BG_SECURITY1 Bulgarian phrase about suspicious activity
+
+body BG_SECURITY2 /нарушение на сигурността|пробив в сигурността/i
+score BG_SECURITY2 2.0
+describe BG_SECURITY2 Bulgarian phrase about security breach
+
+body BG_SECURITY3 /защитете акаунт|предпазни мерки/i
+score BG_SECURITY3 1.5
+describe BG_SECURITY3 Bulgarian phrase about protecting account
+
+# Financial/Payment Related
+body BG_PAYMENT1 /проблем.*плащане|неуспешно плащане/i
+score BG_PAYMENT1 2.0
+describe BG_PAYMENT1 Bulgarian phrase about payment problem
+
+body BG_PAYMENT2 /актуализирайте.*плащане|обновяване.*метод на плащане/i
+score BG_PAYMENT2 2.0
+describe BG_PAYMENT2 Bulgarian phrase about updating payment method
+
+body BG_PAYMENT3 /банкова информация|данни за кредитна карта/i
+score BG_PAYMENT3 2.0
+describe BG_PAYMENT3 Bulgarian phrase about bank/credit card info
+
+# Common Phishing Phrases
+body BG_PHISH_PHRASE1 /кликнете тук|натиснете тук/i
+score BG_PHISH_PHRASE1 1.0
+describe BG_PHISH_PHRASE1 Bulgarian "click here" phrase
+
+body BG_PHISH_PHRASE2 /въведете данни|въведете информация/i
+score BG_PHISH_PHRASE2 1.5
+describe BG_PHISH_PHRASE2 Bulgarian phrase about entering data
+
+body BG_PHISH_PHRASE3 /следвайте връзка|последвайте връзката|посетете линка|посетете линкът|отворете линка|отворете линкът|цъкнете линка|цъкнете линкът|цъкни линка|цъкни линкът/i
+score BG_PHISH_PHRASE3 0.5
+describe BG_PHISH_PHRASE3 Bulgarian phrase about following a link
+
+##############################################
+# URL and Link Detection
+##############################################
+
+# Base64 in URLs
+uri BG_BASE64_URL /[a-zA-Z0-9+\/]{20,}={0,2}/
+score BG_BASE64_URL 3.0
+describe BG_BASE64_URL URL contains likely base64 encoded data
+
+# PHP URLs
+uri BG_PHP_URL /\.php(\?|$)/i
+score BG_PHP_URL 1.5
+describe BG_PHP_URL URL contains PHP script
+
+# Suspicious URL patterns
+uri BG_SUSPICIOUS_URL1 /login|signin|wp-content|account/i
+score BG_SUSPICIOUS_URL1 0.2
+describe BG_SUSPICIOUS_URL1 URL contains suspicious terms related to login
+
+uri BG_SUSPICIOUS_URL2 /secure|security/i
+score BG_SUSPICIOUS_URL2 1.0
+describe BG_SUSPICIOUS_URL2 URL contains suspicious terms related to security
+
+uri BG_SUSPICIOUS_URL3 /update|verify|confirm/i
+score BG_SUSPICIOUS_URL3 1.0
+describe BG_SUSPICIOUS_URL3 URL contains suspicious terms related to verification
+
+# Look for obfuscated URLs
+uri BG_NUMERIC_IP /https?:\/\/\d+\.\d+\.\d+\.\d+/i
+score BG_NUMERIC_IP 2.0
+describe BG_NUMERIC_IP URL uses numeric IP instead of domain name
+
+uri BG_URL_REDIRECT /https?:\/\/.*redirect|препращане|пренасочване/i
+score BG_URL_REDIRECT 1.5
+describe BG_URL_REDIRECT URL contains redirection terms
+
+##############################################
+# Meta Rules (Combining multiple indicators)
+##############################################
+
+# Meta rule: Password reset phishing
+meta BG_PWD_PHISHING (BG_PWD_RESET1 || BG_PWD_RESET2 || BG_PWD_RESET3 || BG_PWD_RESET4) && (BG_PHISH_PHRASE1 || BG_PHISH_PHRASE2 || BG_PHISH_PHRASE3)
+score BG_PWD_PHISHING 3.0
+describe BG_PWD_PHISHING Email contains Bulgarian password reset phrases and suspicious action phrases
+
+# Meta rule: Account verification phishing
+meta BG_ACCOUNT_PHISHING (BG_ACCOUNT_EXPIRE1 || BG_ACCOUNT_EXPIRE2 || BG_ACCOUNT_SUSPEND || BG_ACCOUNT_VERIFY) && (BG_SUSPICIOUS_URL1 || BG_SUSPICIOUS_URL2 || BG_SUSPICIOUS_URL3)
+score BG_ACCOUNT_PHISHING 3.5
+describe BG_ACCOUNT_PHISHING Email combines Bulgarian account issues with suspicious URLs
+
+# Meta rule: Urgent action phishing 
+meta BG_URGENT_PHISHING (BG_URGENT1 || BG_URGENT2 || BG_URGENT3) && (BG_PHP_URL || BG_BASE64_URL)
+score BG_URGENT_PHISHING 4.0
+describe BG_URGENT_PHISHING Bulgarian urgency phrases combined with suspicious URL patterns
+
+# Meta rule: High-confidence phishing
+meta BG_HIGH_CONFIDENCE_PHISH (BG_URGENT1 || BG_URGENT2 || BG_URGENT3) && (BG_ACCOUNT_EXPIRE1 || BG_ACCOUNT_EXPIRE2 || BG_PWD_RESET1) && (BG_PHISH_PHRASE1 || BG_PHISH_PHRASE2) && (BG_PHP_URL || BG_BASE64_URL)
+score BG_HIGH_CONFIDENCE_PHISH 8.0
+describe BG_HIGH_CONFIDENCE_PHISH Multiple Bulgarian phishing indicators detected
+
+# Meta rule: Security alert phishing
+meta BG_SECURITY_PHISHING (BG_SECURITY1 || BG_SECURITY2 || BG_SECURITY3) && (BG_INFO_REQUIRED1 || BG_INFO_REQUIRED2 || BG_VERIFY_IDENTITY)
+score BG_SECURITY_PHISHING 3.0
+describe BG_SECURITY_PHISHING Combines security alerts with requests for information in Bulgarian
+
+# Meta rule: Financial information phishing
+meta BG_FINANCIAL_PHISHING (BG_PAYMENT1 || BG_PAYMENT2 || BG_PAYMENT3) && (BG_URGENT1 || BG_URGENT2 || BG_URGENT3)
+score BG_FINANCIAL_PHISHING 4.0
+describe BG_FINANCIAL_PHISHING Urgent requests related to financial information in Bulgarian
+
+##############################################
+# Header Rules for Bulgarian phishing
+##############################################
+
+# Suspicious Bulgarian subject lines
+header BG_SUBJ_PWD /Subject: .*парол[а|и].*изтек/i
+score BG_SUBJ_PWD 2.0
+describe BG_SUBJ_PWD Subject contains Bulgarian password expiration terms
+
+header BG_SUBJ_ACCOUNT /Subject: .*акаунт.*активир|потвърд|верифиц/i
+score BG_SUBJ_ACCOUNT 2.0
+describe BG_SUBJ_ACCOUNT Subject contains Bulgarian account verification terms
+
+header BG_SUBJ_URGENT /Subject: .*\[спешно|важно|критично\]/i
+score BG_SUBJ_URGENT 1.5
+describe BG_SUBJ_URGENT Subject contains Bulgarian urgency indicators
