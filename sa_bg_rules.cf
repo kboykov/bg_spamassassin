@@ -2,7 +2,7 @@ body BG_PHISHING_URGENCY /\b(?:важно|спешно|изтича|изтекъ
 describe BG_PHISHING_URGENCY Bulgarian words/phrases often used in phishing or urgency/spam emails 
 score BG_PHISHING_URGENCY 0.1
 
-body PHISH_BG_CLICK_ACTION /(?:натиснете тук|кликнете върху|отворете|отворете писмото|потвърдите|потвърдете|актуализирайте данните|актуализиране|актуализиране)/i
+body PHISH_BG_CLICK_ACTION /(?:натиснете тук|кликнете върху|отворете|отворете писмото|потвърдите|потвърдете|актуализирайте данните|актуализиране|актуализирайте)/i
 score PHISH_BG_CLICK_ACTION 0.2
 describe PHISH_BG_CLICK_ACTION Contains suspicious call-to-action phrases
 
